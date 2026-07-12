@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GestiónPro Local — Comidas Rápidas Chucho</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rojo:          #CC0000;
+      --rojo-oscuro:   #990000;
+      --rojo-claro:    #FF3333;
+      --morado:        #4B0082;
+      --morado-medio:  #6A0DAD;
+      --morado-claro:  #7B2FBE;
+      --amarillo:      #FFD700;
+      --amarillo-claro:#FFF176;
+      --blanco:        #FFFFFF;
+      --gris-claro:    #F5F5F5;
+      --gris-borde:    #E0E0E0;
+      --texto-oscuro:  #1A1A2E;
+      --texto-medio:   #555555;
+      --verde:         #2E7D32;
+      --verde-claro:   #E8F5E9;
+      --naranja:       #E65100;
+      --naranja-claro: #FFF3E0;
+      --azul-info:     #1565C0;
+      --azul-claro:    #E3F2FD;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--gris-claro);
+      color: var(--texto-oscuro);
+      min-height: 100vh;
+    }
+
+    /* ===================== TABS BAR ===================== */
+    .tabs-bar {
+      background: var(--rojo-oscuro);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      padding: 0 0 0 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .tab-btn {
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+    .tab-btn:hover  { color: #fff; background: rgba(255,255,255,0.1); }
+    .tab-btn.active { color: var(--amarillo); border-bottom: 3px solid var(--amarillo); background: rgba(0,0,0,0.2); }
+
+    /* ===================== SCREENS ===================== */
+    .screen { display: none; }
+    .screen.active { display: flex; min-height: calc(100vh - 49px); }
+
+    /* ===================== LOGIN ===================== */
+    #screen-login {
+      background: var(--rojo);
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+    }
+    .login-card {
+      background: var(--amarillo);
+      border-radius: 14px;
+      padding: 40px 44px;
+      width: 340px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      text-align: center;
+    }
+    .login-logo {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--rojo);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px; color: var(--amarillo);
+      letter-spacing: 2px;
+    }
+    .login-title {
+      font-size: 14px;
+      color: var(--rojo-oscuro);
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+    .login-card input[type="text"],
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #ccc;
+      border-radius: 7px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      font-family: 'Nunito', sans-serif;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-card input:focus { border-color: var(--azul-info); }
+    .login-check {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; margin-bottom: 16px;
+      color: var(--texto-oscuro); text-align: left;
+    }
+    .btn-login {
+      width: 100%; padding: 12px;
+      background: var(--azul-info); color: #fff;
+      border: none; border-radius: 7px;
+      font-weight: 700; font-size: 14px; cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: 0.5px;
+      transition: background 0.2s;
+    }
+    .btn-login:hover { background: #0D47A1; }
+    .login-link {
+      font-size: 12px; color: var(--rojo-oscuro);
+      margin-top: 12px; text-decoration: underline; cursor: pointer;
+    }
+
+    /* ===================== SIDEBAR ===================== */
+    .layout-main { display: flex; width: 100%; }
+
+    .sidebar {
+      width: 210px; min-width: 210px;
+      background: var(--morado);
+      padding: 16px 0;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; color: var(--amarillo);
+      padding: 0 18px 16px;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      margin-bottom: 8px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 18px;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item.active {
+      background: rgba(255,255,255,0.15);
+      color: var(--amarillo);
+      border-left: 3px solid var(--amarillo);
+    }
+    .nav-item i { font-size: 17px; }
+    .nav-bottom {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 18px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px; cursor: pointer;
+      transition: color 0.15s;
+    }
+    .logout-btn:hover { color: #fff; }
+
+    /* ===================== MAIN CONTENT ===================== */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      background: var(--rojo);
+      padding: 0 22px;
+      height: 50px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .topbar-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; color: #fff; letter-spacing: 1px;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-bell {
+      background: rgba(255,255,255,0.18);
+      border: none; border-radius: 6px;
+      padding: 6px 12px; color: #fff; cursor: pointer;
+      font-size: 12px; font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.2s;
+    }
+    .topbar-bell:hover { background: rgba(255,255,255,0.28); }
+    .topbar-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--morado-claro);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 700;
+    }
+
+    .page-body {
+      flex: 1; padding: 22px;
+      overflow-y: auto;
+      background: var(--gris-claro);
+    }
+
+    /* ===================== STAT CARDS ===================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 22px;
+    }
+    .stats-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px; margin-bottom: 22px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      border: 0.5px solid var(--gris-borde);
+      padding: 16px 18px;
+    }
+    .stat-label { font-size: 11px; color: var(--texto-medio); font-weight: 600; margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--texto-oscuro); }
+    .stat-value.verde  { color: var(--verde); }
+
+    /* ===================== SECTION TITLE ===================== */
+    .section-title {
+      font-size: 15px; font-weight: 700;
+      color: var(--texto-oscuro); margin-bottom: 12px;
+    }
+    .section-title-display {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px; letter-spacing: 1.5px;
+      color: var(--texto-oscuro); margin-bottom: 14px;
+    }
+
+    /* ===================== TABLE ===================== */
+    .table-wrap {
+      background: #fff;
+      border-radius: 8px;
+      border: 0.5px solid var(--gris-borde);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: var(--rojo);
+      color: #fff; font-size: 11px;
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 11px 15px; text-align: left;
+    }
+    tbody td {
+      padding: 11px 15px;
+      border-bottom: 0.5px solid var(--gris-borde);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #FFF8E1; }
+
+    /* ===================== BADGES ===================== */
+    .badge {
+      display: inline-block;
+      padding: 3px 11px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge-pendiente  { background: #FFF3E0; color: #E65100; }
+    .badge-completado { background: #E8F5E9; color: #2E7D32; }
+    .badge-proceso    { background: #E3F2FD; color: #1565C0; }
+    .badge-activo     { background: #E8F5E9; color: #2E7D32; }
+    .badge-efectivo   { background: #F3E5F5; color: #6A1B9A; }
+    .badge-tarjeta    { background: #E3F2FD; color: #1565C0; }
+    .badge-nequi      { background: #FCE4EC; color: #C62828; }
+
+    /* ===================== BUTTONS ===================== */
+    .btn-nuevo {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 18px;
+      background: var(--rojo); color: #fff;
+      border: none; border-radius: 7px;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: 'Nunito', sans-serif;
+      margin-bottom: 16px;
+      transition: background 0.2s;
+    }
+    .btn-nuevo:hover { background: var(--rojo-oscuro); }
+
+    .btn-editar {
+      padding: 5px 11px; border-radius: 5px;
+      background: var(--azul-info); color: #fff;
+      border: none; font-size: 11px;
+      font-weight: 700; cursor: pointer; margin-right: 5px;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-editar:hover { background: #0D47A1; }
+
+    .btn-eliminar {
+      padding: 5px 11px; border-radius: 5px;
+      background: var(--rojo); color: #fff;
+      border: none; font-size: 11px;
+      font-weight: 700; cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-eliminar:hover { background: var(--rojo-oscuro); }
+
+    /* icon-only action buttons */
+    .icon-edit {
+      background: var(--azul-info); color: #fff;
+      border: none; border-radius: 5px;
+      width: 30px; height: 30px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; margin-right: 5px; font-size: 15px;
+      transition: background 0.2s;
+    }
+    .icon-edit:hover { background: #0D47A1; }
+
+    .icon-del {
+      background: none; color: var(--rojo);
+      border: 2px solid var(--rojo); border-radius: 50%;
+      width: 30px; height: 30px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .icon-del:hover { background: var(--rojo); color: #fff; }
+
+    /* ===================== SEARCH ROW ===================== */
+    .search-row {
+      display: flex; gap: 10px;
+      margin-bottom: 16px; align-items: center; flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1; min-width: 180px; padding: 9px 13px;
+      border: 1.5px solid var(--gris-borde); border-radius: 7px;
+      font-size: 13px; font-family: 'Nunito', sans-serif;
+      outline: none; transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--azul-info); }
+
+    .select-cat {
+      padding: 9px 13px;
+      border: 1.5px solid var(--gris-borde); border-radius: 7px;
+      font-size: 13px; font-family: 'Nunito', sans-serif;
+      background: #fff; outline: none;
+    }
+
+    /* ===================== VENTAS HEADER ===================== */
+    .ventas-header {
+      background: #fff; border-radius: 8px;
+      border: 0.5px solid var(--gris-borde);
+      padding: 14px 18px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .date-label { font-size: 13px; color: var(--texto-medio); font-weight: 700; }
+    .date-input {
+      padding: 8px 11px; border-radius: 7px;
+      border: 1.5px solid var(--gris-borde);
+      font-size: 13px; font-family: 'Nunito', sans-serif; outline: none;
+    }
+    .btn-filtrar {
+      padding: 9px 18px; background: var(--rojo); color: #fff;
+      border: none; border-radius: 7px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-filtrar:hover { background: var(--rojo-oscuro); }
+
+    /* ===================== PRODUCT IMAGE ===================== */
+    .prod-img {
+      width: 38px; height: 38px; border-radius: 7px;
+      background: linear-gradient(135deg, #FF6B35, #FFD700);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+
+    /* ===================== CLIENT AVATAR ===================== */
+    .cli-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--morado); color: var(--amarillo);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ===================== INVENTORY ===================== */
+    .inv-stock { font-weight: 700; }
+    .inv-bajo  { color: var(--naranja); }
+
+    /* ===================== PAGINATION ===================== */
+    .pagination {
+      display: flex; align-items: center; gap: 5px;
+      margin-top: 14px; justify-content: flex-end;
+    }
+    .page-btn {
+      padding: 6px 13px; border-radius: 6px;
+      border: 1.5px solid var(--gris-borde);
+      background: #fff; font-size: 12px;
+      cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 700;
+      transition: all 0.15s;
+    }
+    .page-btn:hover  { background: var(--gris-claro); }
+    .page-btn.active { background: var(--rojo); color: #fff; border-color: var(--rojo); }
+
+    /* ===================== FLEX HEADER ROW ===================== */
+    .flex-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     BARRA DE NAVEGACIÓN ENTRE PANTALLAS
+============================================================ -->
+<div class="tabs-bar">
+  <button class="tab-btn active"   onclick="showScreen('login')">      🔐 Login      </button>
+  <button class="tab-btn"          onclick="showScreen('dashboard')">  📊 Dashboard  </button>
+  <button class="tab-btn"          onclick="showScreen('productos')">  🍔 Productos  </button>
+  <button class="tab-btn"          onclick="showScreen('clientes')">   👥 Clientes   </button>
+  <button class="tab-btn"          onclick="showScreen('pedidos')">    📋 Pedidos    </button>
+  <button class="tab-btn"          onclick="showScreen('ventas')">     💰 Ventas     </button>
+  <button class="tab-btn"          onclick="showScreen('inventario')"> 📦 Inventario </button>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 1 — LOGIN
+============================================================ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">CRC</div>
+    <div class="login-title">Bienvenido al sistema</div>
+    <input type="text"     placeholder="Usuario" />
+    <input type="password" placeholder="Contraseña" />
+    <div class="login-check">
+      <input type="checkbox" id="rem" />
+      <label for="rem">Recordarme</label>
+    </div>
+    <button class="btn-login" onclick="showScreen('dashboard')">Iniciar sesión</button>
+    <div class="login-link">¿Olvidaste tu contraseña?</div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 2 — DASHBOARD
+============================================================ -->
+<div id="screen-dashboard" class="screen layout-main">
+  <div class="sidebar">
+    <div class="sidebar-title">GestiónPro</div>
+    <div class="nav-item active">                              <i class="ti ti-home"></i>           Inicio       </div>
+    <div class="nav-item" onclick="showScreen('productos')">  <i class="ti ti-clipboard-list"></i> Productos    </div>
+    <div class="nav-item" onclick="showScreen('pedidos')">    <i class="ti ti-receipt"></i>         Pedidos      </div>
+    <div class="nav-item" onclick="showScreen('clientes')">   <i class="ti ti-users"></i>           Clientes     </div>
+    <div class="nav-item" onclick="showScreen('ventas')">     <i class="ti ti-chart-bar"></i>       Ventas       </div>
+    <div class="nav-item" onclick="showScreen('inventario')"> <i class="ti ti-box"></i>             Inventario   </div>
+    <div class="nav-item">                                    <i class="ti ti-file-analytics"></i>  Reportes     </div>
+    <div class="nav-item">                                    <i class="ti ti-settings"></i>        Configuración</div>
+    <div class="nav-bottom">
+      <div class="logout-btn" onclick="showScreen('login')"><i class="ti ti-logout"></i> Cerrar sesión</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Sistema de GestiónPro Local</div>
+      <div class="topbar-right">
+        <div class="topbar-avatar">D</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Pedidos del día</div>   <div class="stat-value">120</div></div>
+        <div class="stat-card"><div class="stat-label">Ventas del día</div>    <div class="stat-value verde">$1,500</div></div>
+        <div class="stat-card"><div class="stat-label">Clientes registrados</div><div class="stat-value">500</div></div>
+        <div class="stat-card"><div class="stat-label">Productos activos</div> <div class="stat-value">75</div></div>
+      </div>
+      <div class="section-title">Pedidos recientes</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID Pedido</th><th>Cliente</th><th>Estado</th><th>Total</th><th>Fecha</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>#001</td><td>Juan Pérez</td>   <td><span class="badge badge-pendiente">Pendiente</span></td>  <td>$25,000</td><td>2023-10-26</td></tr>
+            <tr><td>#002</td><td>María García</td> <td><span class="badge badge-completado">Completado</span></td><td>$35,500</td><td>2023-10-26</td></tr>
+            <tr><td>#003</td><td>Carlos Ruiz</td>  <td><span class="badge badge-proceso">En proceso</span></td>   <td>$18,750</td><td>2023-10-25</td></tr>
+            <tr><td>#004</td><td>Ana López</td>    <td><span class="badge badge-completado">Completado</span></td><td>$42,000</td><td>2023-10-25</td></tr>
+            <tr><td>#005</td><td>Pedro Gómez</td>  <td><span class="badge badge-pendiente">Pendiente</span></td>  <td>$24,990</td><td>2023-10-24</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 3 — GESTIÓN DE PRODUCTOS
+============================================================ -->
+<div id="screen-productos" class="screen layout-main">
+  <div class="sidebar">
+    <div class="sidebar-title">GestiónPro</div>
+    <div class="nav-item" onclick="showScreen('dashboard')">  <i class="ti ti-home"></i>           Inicio       </div>
+    <div class="nav-item active">                             <i class="ti ti-clipboard-list"></i> Productos    </div>
+    <div class="nav-item" onclick="showScreen('pedidos')">    <i class="ti ti-receipt"></i>         Pedidos      </div>
+    <div class="nav-item" onclick="showScreen('clientes')">   <i class="ti ti-users"></i>           Clientes     </div>
+    <div class="nav-item" onclick="showScreen('ventas')">     <i class="ti ti-chart-bar"></i>       Ventas       </div>
+    <div class="nav-item" onclick="showScreen('inventario')"> <i class="ti ti-box"></i>             Inventario   </div>
+    <div class="nav-item">                                    <i class="ti ti-file-analytics"></i>  Reportes     </div>
+    <div class="nav-item">                                    <i class="ti ti-settings"></i>        Configuración</div>
+    <div class="nav-bottom">
+      <div class="logout-btn" onclick="showScreen('login')"><i class="ti ti-logout"></i> Cerrar sesión</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Gestión de Productos</div>
+      <div class="topbar-right"><div class="topbar-avatar">D</div></div>
+    </div>
+    <div class="page-body">
+      <button class="btn-nuevo"><i class="ti ti-plus"></i> Nuevo Producto</button>
+      <div class="search-row">
+        <input class="search-input" placeholder="🔍 Buscar producto..." />
+        <select class="select-cat">
+          <option>Todas las categorías</option>
+          <option>Hamburguesas</option>
+          <option>Perros Calientes</option>
+          <option>Sandwiches</option>
+          <option>Acompañamientos</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Imagen</th><th>Nombre del producto</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="prod-img">🍔</span></td>
+              <td>Hamburguesa Especial</td><td>Hamburguesas</td><td>$8,500</td>
+              <td><span class="badge badge-activo">Activo</span></td>
+              <td><button class="btn-editar">✏ Editar</button><button class="btn-eliminar">🗑 Eliminar</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-img">🌭</span></td>
+              <td>Perro Caliente</td><td>Perros Calientes</td><td>$4,000</td>
+              <td><span class="badge badge-activo">Activo</span></td>
+              <td><button class="btn-editar">✏ Editar</button><button class="btn-eliminar">🗑 Eliminar</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-img">🥪</span></td>
+              <td>Sandwich Mixto</td><td>Sandwiches</td><td>$6,250</td>
+              <td><span class="badge badge-activo">Activo</span></td>
+              <td><button class="btn-editar">✏ Editar</button><button class="btn-eliminar">🗑 Eliminar</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-img">🍟</span></td>
+              <td>Salchipapa</td><td>Acompañamientos</td><td>$5,750</td>
+              <td><span class="badge badge-activo">Activo</span></td>
+              <td><button class="btn-editar">✏ Editar</button><button class="btn-eliminar">🗑 Eliminar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 4 — GESTIÓN DE CLIENTES
+============================================================ -->
+<div id="screen-clientes" class="screen layout-main">
+  <div class="sidebar">
+    <div class="sidebar-title">GestiónPro</div>
+    <div class="nav-item" onclick="showScreen('dashboard')">  <i class="ti ti-home"></i>           Inicio       </div>
+    <div class="nav-item" onclick="showScreen('productos')">  <i class="ti ti-clipboard-list"></i> Productos    </div>
+    <div class="nav-item" onclick="showScreen('pedidos')">    <i class="ti ti-receipt"></i>         Pedidos      </div>
+    <div class="nav-item active">                             <i class="ti ti-users"></i>           Clientes     </div>
+    <div class="nav-item" onclick="showScreen('ventas')">     <i class="ti ti-chart-bar"></i>       Ventas       </div>
+    <div class="nav-item" onclick="showScreen('inventario')"> <i class="ti ti-box"></i>             Inventario   </div>
+    <div class="nav-item">                                    <i class="ti ti-file-analytics"></i>  Reportes     </div>
+    <div class="nav-item">                                    <i class="ti ti-settings"></i>        Configuración</div>
+    <div class="nav-bottom">
+      <div class="logout-btn" onclick="showScreen('login')"><i class="ti ti-logout"></i> Cerrar sesión</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Gestión de Clientes</div>
+      <div class="topbar-right">
+        <button class="topbar-bell"><i class="ti ti-bell"></i> NOTIFICACIONES</button>
+        <div class="topbar-avatar">D</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="section-title-display">CLIENTES</div>
+      <input class="search-input" style="width:100%;margin-bottom:18px;" placeholder="🔍 BUSCAR CLIENTE" />
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="cli-circle">LJ</span></td>
+              <td>Laura Jimenez</td><td>318 1400298</td><td>lauralimenez@gmail.com</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="cli-circle">CS</span></td>
+              <td>Carlos Sanchez</td><td>322 4789755</td><td>carlossanchez@gmail.com</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="cli-circle">IS</span></td>
+              <td>Isabella Sophia</td><td>344 2346655</td><td>isabellasophia@gmail.com</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="cli-circle">ZC</span></td>
+              <td>Zaith Chanth</td><td>324 5674088</td><td>zaithchanth@gmail.com</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 5 — GESTIÓN DE PEDIDOS
+============================================================ -->
+<div id="screen-pedidos" class="screen layout-main">
+  <div class="sidebar">
+    <div class="sidebar-title">GestiónPro</div>
+    <div class="nav-item" onclick="showScreen('dashboard')">  <i class="ti ti-home"></i>           Inicio       </div>
+    <div class="nav-item" onclick="showScreen('productos')">  <i class="ti ti-clipboard-list"></i> Productos    </div>
+    <div class="nav-item active">                             <i class="ti ti-receipt"></i>         Pedidos      </div>
+    <div class="nav-item" onclick="showScreen('clientes')">   <i class="ti ti-users"></i>           Clientes     </div>
+    <div class="nav-item" onclick="showScreen('ventas')">     <i class="ti ti-chart-bar"></i>       Ventas       </div>
+    <div class="nav-item" onclick="showScreen('inventario')"> <i class="ti ti-box"></i>             Inventario   </div>
+    <div class="nav-item">                                    <i class="ti ti-file-analytics"></i>  Reportes     </div>
+    <div class="nav-item">                                    <i class="ti ti-settings"></i>        Configuración</div>
+    <div class="nav-bottom">
+      <div class="logout-btn" onclick="showScreen('login')"><i class="ti ti-logout"></i> Cerrar sesión</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Gestión de Pedidos</div>
+      <div class="topbar-right"><div class="topbar-avatar">D</div></div>
+    </div>
+    <div class="page-body">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Pedidos del día</div>   <div class="stat-value">120</div></div>
+        <div class="stat-card"><div class="stat-label">Ventas del día</div>    <div class="stat-value verde">$1,500</div></div>
+        <div class="stat-card"><div class="stat-label">Clientes registrados</div><div class="stat-value">500</div></div>
+        <div class="stat-card"><div class="stat-label">Productos activos</div> <div class="stat-value">75</div></div>
+      </div>
+      <div class="section-title">Pedidos recientes</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID Pedido</th><th>Cliente</th><th>Estado</th><th>Total</th><th>Fecha</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>#001</td><td>Juan Pérez</td>   <td><span class="badge badge-pendiente">Pendiente</span></td>  <td>$25,000</td><td>2023-10-26</td></tr>
+            <tr><td>#002</td><td>María García</td> <td><span class="badge badge-completado">Completado</span></td><td>$35,500</td><td>2023-10-26</td></tr>
+            <tr><td>#003</td><td>Carlos Ruiz</td>  <td><span class="badge badge-proceso">En proceso</span></td>   <td>$18,750</td><td>2023-10-25</td></tr>
+            <tr><td>#004</td><td>Ana López</td>    <td><span class="badge badge-completado">Completado</span></td><td>$42,000</td><td>2023-10-25</td></tr>
+            <tr><td>#005</td><td>Pedro Gómez</td>  <td><span class="badge badge-pendiente">Pendiente</span></td>  <td>$24,990</td><td>2023-10-24</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 6 — GESTIÓN DE VENTAS
+============================================================ -->
+<div id="screen-ventas" class="screen layout-main">
+  <div class="sidebar">
+    <div class="sidebar-title">GestiónPro</div>
+    <div class="nav-item" onclick="showScreen('dashboard')">  <i class="ti ti-home"></i>           Inicio       </div>
+    <div class="nav-item" onclick="showScreen('productos')">  <i class="ti ti-clipboard-list"></i> Productos    </div>
+    <div class="nav-item" onclick="showScreen('pedidos')">    <i class="ti ti-receipt"></i>         Pedidos      </div>
+    <div class="nav-item" onclick="showScreen('clientes')">   <i class="ti ti-users"></i>           Clientes     </div>
+    <div class="nav-item active">                             <i class="ti ti-chart-bar"></i>       Ventas       </div>
+    <div class="nav-item" onclick="showScreen('inventario')"> <i class="ti ti-box"></i>             Inventario   </div>
+    <div class="nav-item">                                    <i class="ti ti-file-analytics"></i>  Reportes     </div>
+    <div class="nav-item">                                    <i class="ti ti-settings"></i>        Configuración</div>
+    <div class="nav-bottom">
+      <div class="logout-btn" onclick="showScreen('login')"><i class="ti ti-logout"></i> Cerrar sesión</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Gestión de Ventas</div>
+      <div class="topbar-right">
+        <button class="topbar-bell"><i class="ti ti-bell"></i> NOTIFICACIONES</button>
+        <div class="topbar-avatar">D</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="section-title-display">ventas</div>
+      <div class="ventas-header">
+        <span class="date-label">Desde:</span>
+        <input class="date-input" type="date" value="2025-05-20" />
+        <span class="date-label">Hasta:</span>
+        <input class="date-input" type="date" value="2025-05-20" />
+        <button class="btn-filtrar">Filtrar</button>
+      </div>
+      <div class="stats-grid-3">
+        <div class="stat-card"><div class="stat-label">Ventas del día</div>       <div class="stat-value verde" style="font-size:22px;">$1.054.000</div></div>
+        <div class="stat-card"><div class="stat-label">Pedidos</div>              <div class="stat-value" style="font-size:22px;">25</div></div>
+        <div class="stat-card"><div class="stat-label">Promedio por pedido</div>  <div class="stat-value" style="font-size:22px;">$77.000</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID Venta</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Método de pago</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>VNT-0021</td><td>20/05/2025 10:06 pm</td><td>Juan Carlos</td> <td>100,000</td><td><span class="badge badge-efectivo">Efectivo</span></td></tr>
+            <tr><td>VNT-0020</td><td>20/05/2025 10:00 pm</td><td>Jhon Carlos</td> <td>69,000</td> <td><span class="badge badge-tarjeta">Tarjeta</span></td></tr>
+            <tr><td>VNT-0019</td><td>20/05/2025 09:00 pm</td><td>Jesus Rojas</td> <td>128,000</td><td><span class="badge badge-efectivo">Efectivo</span></td></tr>
+            <tr><td>VNT-0018</td><td>20/05/2025 07:00 pm</td><td>Karla Niño</td>  <td>10,000</td> <td><span class="badge badge-nequi">Nequi</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button class="page-btn">Anterior</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">Siguiente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PANTALLA 7 — GESTIÓN DE INVENTARIO
+============================================================ -->
+<div id="screen-inventario" class="screen layout-main">
+  <div class="sidebar">
+    <div class="sidebar-title">GestiónPro</div>
+    <div class="nav-item" onclick="showScreen('dashboard')">  <i class="ti ti-home"></i>           Inicio       </div>
+    <div class="nav-item" onclick="showScreen('productos')">  <i class="ti ti-clipboard-list"></i> Productos    </div>
+    <div class="nav-item" onclick="showScreen('pedidos')">    <i class="ti ti-receipt"></i>         Pedidos      </div>
+    <div class="nav-item" onclick="showScreen('clientes')">   <i class="ti ti-users"></i>           Clientes     </div>
+    <div class="nav-item" onclick="showScreen('ventas')">     <i class="ti ti-chart-bar"></i>       Ventas       </div>
+    <div class="nav-item active">                             <i class="ti ti-box"></i>             Inventario   </div>
+    <div class="nav-item">                                    <i class="ti ti-file-analytics"></i>  Reportes     </div>
+    <div class="nav-item">                                    <i class="ti ti-settings"></i>        Configuración</div>
+    <div class="nav-bottom">
+      <div class="logout-btn" onclick="showScreen('login')"><i class="ti ti-logout"></i> Cerrar sesión</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Gestión de Inventario</div>
+      <div class="topbar-right">
+        <button class="topbar-bell"><i class="ti ti-bell"></i> NOTIFICACIONES</button>
+        <div class="topbar-avatar">D</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="flex-header">
+        <div class="section-title-display">Inventario</div>
+        <button class="btn-nuevo" style="margin-bottom:0;"><i class="ti ti-plus"></i> Nuevo ítem</button>
+      </div>
+      <div class="search-row">
+        <input class="search-input" placeholder="Buscar ítem..." />
+        <span class="date-label">Categoría:</span>
+        <select class="select-cat">
+          <option>Todas</option>
+          <option>Panes</option>
+          <option>Carnes</option>
+          <option>Lácteos</option>
+          <option>Verduras</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Ítem</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Unidad</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pan de hamburguesa</td><td>Panes</td>
+              <td><span class="inv-stock">50</span></td><td>20</td><td>und</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+            <tr>
+              <td>Carne de res</td><td>Carnes</td>
+              <td><span class="inv-stock inv-bajo">15</span></td><td>10</td><td>kg</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+            <tr>
+              <td>Queso</td><td>Lácteos</td>
+              <td><span class="inv-stock">20</span></td><td>10</td><td>kg</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+            <tr>
+              <td>Papa</td><td>Verduras</td>
+              <td><span class="inv-stock">30</span></td><td>15</td><td>kg</td>
+              <td><button class="icon-edit"><i class="ti ti-edit"></i></button><button class="icon-del"><i class="ti ti-x"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button class="page-btn">Anterior</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">Siguiente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     JAVASCRIPT — Navegación entre pantallas
+============================================================ -->
+<script>
+  const TAB_MAP = {
+    login: 0, dashboard: 1, productos: 2,
+    clientes: 3, pedidos: 4, ventas: 5, inventario: 6
+  };
+
+  function showScreen(name) {
+    /* Ocultar todas las pantallas */
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    /* Quitar clase activa de todos los tabs */
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    /* Mostrar pantalla seleccionada */
+    document.getElementById('screen-' + name).classList.add('active');
+    /* Activar el tab correspondiente */
+    if (TAB_MAP[name] !== undefined) {
+      document.querySelectorAll('.tab-btn')[TAB_MAP[name]].classList.add('active');
+    }
+  }
+</script>
+
+</body>
+</html>
