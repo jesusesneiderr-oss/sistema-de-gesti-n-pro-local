@@ -10,14 +10,14 @@ public class Cliente {
     public Cliente() {
     }
 
-    public Cliente(String nombre, String telefono, String correo) {
+    public Cliente(int id, String nombre, String telefono, String correo) {
+        this.id = id;
         this.nombre = nombre;
         this.telefono = telefono;
         this.correo = correo;
     }
 
-    public Cliente(int id, String nombre, String telefono, String correo) {
-        this.id = id;
+    public Cliente(String nombre, String telefono, String correo) {
         this.nombre = nombre;
         this.telefono = telefono;
         this.correo = correo;
