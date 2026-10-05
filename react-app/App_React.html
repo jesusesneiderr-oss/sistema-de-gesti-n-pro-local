@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GestiónPro Local — Panel React</title>
+
+<!-- ============================================================
+     Librerías cargadas vía CDN (no se usa bundler/Node en este
+     proyecto académico): React, ReactDOM y Babel standalone para
+     poder escribir JSX directamente en el navegador.
+     ============================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --char: #211a15; --char-2: #2b2119; --cream: #f6efe2;
+    --marigold: #f2a93b; --tomato: #d8442f; --avocado: #7a9b5e;
+    --line: rgba(246,239,226,0.12); --radius: 4px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--char); color: var(--cream); font-family: 'Work Sans', sans-serif; }
+  header { padding: 28px clamp(20px,5vw,64px) 20px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .brand-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--marigold); margin: 0 0 6px; }
+  h1.brand { font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(32px,5vw,52px); margin: 0; text-transform: uppercase; }
+  h1.brand span { color: var(--tomato); }
+  .status-pill { font-family: 'JetBrains Mono', monospace; font-size: 12px; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 100px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #666; }
+  .dot.ok { background: var(--avocado); box-shadow: 0 0 8px var(--avocado); }
+  .dot.err { background: var(--tomato); box-shadow: 0 0 8px var(--tomato); }
+  nav.tabs { display: flex; gap: 4px; padding: 20px clamp(20px,5vw,64px) 0; }
+  .tab-btn { font-family: 'JetBrains Mono', monospace; font-size: 13px; text-transform: uppercase; background: none; border: 1px solid var(--line); border-bottom: none; color: var(--cream); opacity: .55; padding: 12px 22px; cursor: pointer; border-radius: var(--radius) var(--radius) 0 0; }
+  .tab-btn.active { opacity: 1; background: var(--char-2); color: var(--marigold); }
+  main { padding: 0 clamp(20px,5vw,64px) 64px; background: var(--char-2); border-top: 1px solid var(--line); }
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 40px; padding-top: 36px; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  .form-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; color: var(--marigold); margin: 0 0 16px; }
+  form { display: flex; flex-direction: column; gap: 14px; }
+  label { font-size: 12px; text-transform: uppercase; opacity: .65; display: block; margin-bottom: 6px; }
+  input { width: 100%; background: var(--char); border: 1px solid var(--line); color: var(--cream); padding: 11px 12px; font-size: 14px; border-radius: var(--radius); outline: none; }
+  input:focus { border-color: var(--marigold); }
+  .btn-row { display: flex; gap: 10px; }
+  button.primary, button.ghost { font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; padding: 12px 18px; border-radius: var(--radius); cursor: pointer; border: 1px solid transparent; flex: 1; }
+  button.primary { background: var(--tomato); color: var(--cream); }
+  button.ghost { background: transparent; border-color: var(--line); color: var(--cream); opacity: .75; }
+  .table-wrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; opacity: .55; padding: 14px 16px; border-bottom: 1px solid var(--line); background: rgba(246,239,226,0.03); }
+  tbody td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--line); }
+  td.num { font-family: 'JetBrains Mono', monospace; color: var(--marigold); }
+  .row-actions { display: flex; gap: 8px; }
+  .icon-btn { background: none; border: 1px solid var(--line); color: var(--cream); width: 30px; height: 30px; border-radius: var(--radius); cursor: pointer; }
+  .icon-btn.danger:hover { border-color: var(--tomato); color: var(--tomato); }
+  .empty-state { padding: 48px 16px; text-align: center; opacity: .5; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .table-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+  .table-title h2 { font-family: 'Anton', sans-serif; font-weight: 400; text-transform: uppercase; font-size: 22px; margin: 0; }
+  #toast-wrap { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+  .toast { background: var(--char); border: 1px solid var(--line); border-left: 3px solid var(--avocado); padding: 14px 18px; border-radius: var(--radius); font-family: 'JetBrains Mono', monospace; font-size: 13px; max-width: 320px; }
+  .toast.error { border-left-color: var(--tomato); }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+
+/* ==========================================================
+ * CONFIGURACIÓN GLOBAL
+ * URL base del backend (Servlets Java corriendo sobre Tomcat).
+ * ========================================================== */
+const API_BASE = "http://localhost:8080/gestionpro";
+
+/**
+ * Formatea un número como moneda colombiana.
+ * @param {number} valor
+ * @returns {string}
+ */
+function formatearMoneda(valor) {
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(valor);
+}
+
+/* ==========================================================
+ * COMPONENTE: Toast
+ * Componente de utilidad global. Muestra notificaciones
+ * temporales de éxito o error. Recibe la lista de mensajes
+ * activos por props y se auto-elimina cada uno tras 3.2s.
+ * ========================================================== */
+function Toast({ mensajes }) {
+  return (
+    <div id="toast-wrap">
+      {mensajes.map(m => (
+        <div key={m.id} className={"toast" + (m.esError ? " error" : "")}>
+          {m.texto}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: Navbar
+ * Componente de presentación. Muestra el encabezado del
+ * negocio y el estado de conexión con el backend.
+ * ========================================================== */
+function Navbar({ backendOk }) {
+  return (
+    <header>
+      <div>
+        <p className="brand-eyebrow">Sistema de gestión · Panel React</p>
+        <h1 className="brand">Comidas Rápidas <span>Chucho</span></h1>
+      </div>
+      <div className="status-pill">
+        <span className={"dot " + (backendOk === null ? "" : backendOk ? "ok" : "err")}></span>
+        <span>
+          {backendOk === null ? "Verificando backend…" :
+           backendOk ? "Backend conectado (Tomcat :8080)" :
+           "Backend no disponible"}
+        </span>
+      </div>
+    </header>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ClienteForm
+ * Formulario controlado para crear o editar un cliente.
+ * Recibe por props el cliente en edición (o null si es nuevo)
+ * y las funciones a ejecutar al guardar o cancelar.
+ * ========================================================== */
+function ClienteForm({ clienteEditando, onGuardar, onCancelar }) {
+  const [nombre, setNombre] = React.useState('');
+  const [telefono, setTelefono] = React.useState('');
+  const [correo, setCorreo] = React.useState('');
+
+  // Sincroniza el formulario cuando se selecciona un cliente para editar
+  React.useEffect(() => {
+    if (clienteEditando) {
+      setNombre(clienteEditando.nombre);
+      setTelefono(clienteEditando.telefono);
+      setCorreo(clienteEditando.correo);
+    } else {
+      setNombre(''); setTelefono(''); setCorreo('');
+    }
+  }, [clienteEditando]);
+
+  function manejarEnvio(evento) {
+    evento.preventDefault();
+    onGuardar({ id: clienteEditando ? clienteEditando.id : null, nombre, telefono, correo });
+  }
+
+  return (
+    <div>
+      <p className="form-title">{clienteEditando ? "Editar cliente" : "Registrar cliente"}</p>
+      <form onSubmit={manejarEnvio}>
+        <div>
+          <label>Nombre</label>
+          <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej. María Restrepo" required />
+        </div>
+        <div>
+          <label>Teléfono</label>
+          <input value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="Ej. 3001234567" required />
+        </div>
+        <div>
+          <label>Correo</label>
+          <input type="email" value={correo} onChange={e => setCorreo(e.target.value)} placeholder="cliente@correo.com" required />
+        </div>
+        <div className="btn-row">
+          <button type="submit" className="primary">{clienteEditando ? "Actualizar" : "Guardar"} cliente</button>
+          {clienteEditando && <button type="button" className="ghost" onClick={onCancelar}>Cancelar</button>}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ClienteRow
+ * Representa una fila de la tabla de clientes.
+ * ========================================================== */
+function ClienteRow({ cliente, onEditar, onEliminar }) {
+  return (
+    <tr>
+      <td className="num">#{cliente.id}</td>
+      <td>{cliente.nombre}</td>
+      <td>{cliente.telefono}</td>
+      <td>{cliente.correo}</td>
+      <td>
+        <div className="row-actions">
+          <button className="icon-btn" title="Editar" onClick={() => onEditar(cliente)}>✎</button>
+          <button className="icon-btn danger" title="Eliminar" onClick={() => onEliminar(cliente.id)}>✕</button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ClienteTable
+ * Recibe la lista de clientes por props y delega cada fila
+ * a ClienteRow.
+ * ========================================================== */
+function ClienteTable({ clientes, onEditar, onEliminar }) {
+  return (
+    <div>
+      <div className="table-title">
+        <h2>Clientes registrados</h2>
+        <span>{clientes.length} registro{clientes.length === 1 ? '' : 's'}</span>
+      </div>
+      <div className="table-wrap">
+        {clientes.length === 0 ? (
+          <div className="empty-state">Aún no hay clientes registrados.</div>
+        ) : (
+          <table>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th></th></tr></thead>
+            <tbody>
+              {clientes.map(c => (
+                <ClienteRow key={c.id} cliente={c} onEditar={onEditar} onEliminar={onEliminar} />
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ClientesPanel (contenedor, con estado)
+ * Gestiona el estado de la lista de clientes y coordina el
+ * formulario y la tabla. Es el único que habla con el
+ * backend para todo lo relacionado con clientes.
+ * ========================================================== */
+function ClientesPanel({ mostrarMensaje }) {
+  const [clientes, setClientes] = React.useState([]);
+  const [clienteEditando, setClienteEditando] = React.useState(null);
+
+  async function cargarClientes() {
+    try {
+      const res = await fetch(`${API_BASE}/clientes`);
+      const datos = await res.json();
+      setClientes(datos);
+    } catch (error) {
+      mostrarMensaje('No se pudieron cargar los clientes.', true);
+    }
+  }
+
+  React.useEffect(() => { cargarClientes(); }, []);
+
+  async function guardarCliente(cliente) {
+    const params = new URLSearchParams({ nombre: cliente.nombre, telefono: cliente.telefono, correo: cliente.correo });
+    try {
+      let res;
+      if (cliente.id) {
+        params.append('id', cliente.id);
+        res = await fetch(`${API_BASE}/clientes`, { method: 'PUT', body: params });
+      } else {
+        res = await fetch(`${API_BASE}/clientes`, { method: 'POST', body: params });
+      }
+      if (!res.ok) throw new Error();
+      mostrarMensaje(cliente.id ? 'Cliente actualizado correctamente.' : 'Cliente registrado correctamente.');
+      setClienteEditando(null);
+      cargarClientes();
+    } catch (error) {
+      mostrarMensaje('Error al guardar el cliente.', true);
+    }
+  }
+
+  async function eliminarCliente(id) {
+    if (!window.confirm('¿Eliminar este cliente?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/clientes?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      mostrarMensaje('Cliente eliminado correctamente.');
+      cargarClientes();
+    } catch (error) {
+      mostrarMensaje('Error al eliminar el cliente.', true);
+    }
+  }
+
+  return (
+    <div className="layout">
+      <ClienteForm
+        clienteEditando={clienteEditando}
+        onGuardar={guardarCliente}
+        onCancelar={() => setClienteEditando(null)}
+      />
+      <ClienteTable
+        clientes={clientes}
+        onEditar={setClienteEditando}
+        onEliminar={eliminarCliente}
+      />
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ProductoForm
+ * Formulario controlado para crear o editar un producto.
+ * ========================================================== */
+function ProductoForm({ productoEditando, onGuardar, onCancelar }) {
+  const [nombre, setNombre] = React.useState('');
+  const [precio, setPrecio] = React.useState('');
+  const [stock, setStock] = React.useState('');
+
+  React.useEffect(() => {
+    if (productoEditando) {
+      setNombre(productoEditando.nombre);
+      setPrecio(productoEditando.precio);
+      setStock(productoEditando.stock);
+    } else {
+      setNombre(''); setPrecio(''); setStock('');
+    }
+  }, [productoEditando]);
+
+  function manejarEnvio(evento) {
+    evento.preventDefault();
+    onGuardar({ id: productoEditando ? productoEditando.id : null, nombre, precio, stock });
+  }
+
+  return (
+    <div>
+      <p className="form-title">{productoEditando ? "Editar producto" : "Registrar producto"}</p>
+      <form onSubmit={manejarEnvio}>
+        <div>
+          <label>Nombre</label>
+          <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej. Hamburguesa Chucho" required />
+        </div>
+        <div>
+          <label>Precio</label>
+          <input type="number" step="0.01" min="0" value={precio} onChange={e => setPrecio(e.target.value)} placeholder="Ej. 15000" required />
+        </div>
+        <div>
+          <label>Stock</label>
+          <input type="number" min="0" value={stock} onChange={e => setStock(e.target.value)} placeholder="Ej. 40" required />
+        </div>
+        <div className="btn-row">
+          <button type="submit" className="primary">{productoEditando ? "Actualizar" : "Guardar"} producto</button>
+          {productoEditando && <button type="button" className="ghost" onClick={onCancelar}>Cancelar</button>}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ProductoRow
+ * ========================================================== */
+function ProductoRow({ producto, onEditar, onEliminar }) {
+  return (
+    <tr>
+      <td className="num">#{producto.id}</td>
+      <td>{producto.nombre}</td>
+      <td className="num">{formatearMoneda(producto.precio)}</td>
+      <td className="num">{producto.stock}</td>
+      <td>
+        <div className="row-actions">
+          <button className="icon-btn" title="Editar" onClick={() => onEditar(producto)}>✎</button>
+          <button className="icon-btn danger" title="Eliminar" onClick={() => onEliminar(producto.id)}>✕</button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ProductoTable
+ * ========================================================== */
+function ProductoTable({ productos, onEditar, onEliminar }) {
+  return (
+    <div>
+      <div className="table-title">
+        <h2>Catálogo de productos</h2>
+        <span>{productos.length} registro{productos.length === 1 ? '' : 's'}</span>
+      </div>
+      <div className="table-wrap">
+        {productos.length === 0 ? (
+          <div className="empty-state">Aún no hay productos en el catálogo.</div>
+        ) : (
+          <table>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+            <tbody>
+              {productos.map(p => (
+                <ProductoRow key={p.id} producto={p} onEditar={onEditar} onEliminar={onEliminar} />
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: ProductosPanel (contenedor, con estado)
+ * ========================================================== */
+function ProductosPanel({ mostrarMensaje }) {
+  const [productos, setProductos] = React.useState([]);
+  const [productoEditando, setProductoEditando] = React.useState(null);
+
+  async function cargarProductos() {
+    try {
+      const res = await fetch(`${API_BASE}/productos`);
+      const datos = await res.json();
+      setProductos(datos);
+    } catch (error) {
+      mostrarMensaje('No se pudieron cargar los productos.', true);
+    }
+  }
+
+  React.useEffect(() => { cargarProductos(); }, []);
+
+  async function guardarProducto(producto) {
+    const params = new URLSearchParams({ nombre: producto.nombre, precio: producto.precio, stock: producto.stock });
+    try {
+      let res;
+      if (producto.id) {
+        params.append('id', producto.id);
+        res = await fetch(`${API_BASE}/productos`, { method: 'PUT', body: params });
+      } else {
+        res = await fetch(`${API_BASE}/productos`, { method: 'POST', body: params });
+      }
+      if (!res.ok) throw new Error();
+      mostrarMensaje(producto.id ? 'Producto actualizado correctamente.' : 'Producto registrado correctamente.');
+      setProductoEditando(null);
+      cargarProductos();
+    } catch (error) {
+      mostrarMensaje('Error al guardar el producto.', true);
+    }
+  }
+
+  async function eliminarProducto(id) {
+    if (!window.confirm('¿Eliminar este producto?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/productos?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      mostrarMensaje('Producto eliminado correctamente.');
+      cargarProductos();
+    } catch (error) {
+      mostrarMensaje('Error al eliminar el producto.', true);
+    }
+  }
+
+  return (
+    <div className="layout">
+      <ProductoForm
+        productoEditando={productoEditando}
+        onGuardar={guardarProducto}
+        onCancelar={() => setProductoEditando(null)}
+      />
+      <ProductoTable
+        productos={productos}
+        onEditar={setProductoEditando}
+        onEliminar={eliminarProducto}
+      />
+    </div>
+  );
+}
+
+/* ==========================================================
+ * COMPONENTE: App (raíz)
+ * Controla la pestaña activa (Clientes/Productos), verifica
+ * la conexión con el backend y centraliza las notificaciones
+ * mostradas por el componente Toast.
+ * ========================================================== */
+function App() {
+  const [tabActiva, setTabActiva] = React.useState('clientes');
+  const [backendOk, setBackendOk] = React.useState(null);
+  const [mensajes, setMensajes] = React.useState([]);
+
+  // Verifica una vez, al montar la app, si el backend responde
+  React.useEffect(() => {
+    fetch(`${API_BASE}/clientes`)
+      .then(res => setBackendOk(res.ok))
+      .catch(() => setBackendOk(false));
+  }, []);
+
+  /**
+   * Agrega un mensaje temporal a la pila de notificaciones
+   * (usado por los paneles de Clientes y Productos).
+   */
+  function mostrarMensaje(texto, esError = false) {
+    const id = Date.now();
+    setMensajes(prev => [...prev, { id, texto, esError }]);
+    setTimeout(() => {
+      setMensajes(prev => prev.filter(m => m.id !== id));
+    }, 3200);
+  }
+
+  return (
+    <React.Fragment>
+      <Navbar backendOk={backendOk} />
+      <nav className="tabs">
+        <button className={"tab-btn" + (tabActiva === 'clientes' ? " active" : "")} onClick={() => setTabActiva('clientes')}>Clientes</button>
+        <button className={"tab-btn" + (tabActiva === 'productos' ? " active" : "")} onClick={() => setTabActiva('productos')}>Productos</button>
+      </nav>
+      <main>
+        {tabActiva === 'clientes'
+          ? <ClientesPanel mostrarMensaje={mostrarMensaje} />
+          : <ProductosPanel mostrarMensaje={mostrarMensaje} />}
+      </main>
+      <Toast mensajes={mensajes} />
+    </React.Fragment>
+  );
+}
+
+// Punto de montaje de la aplicación React en el DOM
+const raiz = ReactDOM.createRoot(document.getElementById('root'));
+raiz.render(<App />);
+
+</script>
+</body>
+</html>

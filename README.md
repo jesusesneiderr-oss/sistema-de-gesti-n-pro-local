@@ -362,7 +362,7 @@ Durante su desarrollo se aplican conocimientos relacionados con:
 
 ## 👨‍💻 Autor
 
-**Jesús Esneider Rojas González**
+**Jesús Esneider Rojas González** 2026
 
 - Programa: Análisis y Desarrollo de Software
 - Institución: SENA
