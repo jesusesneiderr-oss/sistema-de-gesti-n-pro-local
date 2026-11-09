@@ -1,3 +1,4 @@
+
 package com.gestionprolocal.conexion;
 
 import java.sql.Connection;
@@ -12,7 +13,9 @@ public class ConexionBD {
 
     private static final String USER = "root";
 
-    private static final String PASSWORD = "jesusrojas18";
+    // La contraseña se obtiene desde una variable de entorno
+    private static final String PASSWORD =
+            System.getenv("GESTIONPRO_DB_PASSWORD");
 
     /**
      * Establece la conexión entre Java y MySQL.
@@ -20,6 +23,13 @@ public class ConexionBD {
     public static Connection conectar() {
 
         try {
+
+            // Verificar que exista la contraseña
+            if (PASSWORD == null || PASSWORD.isBlank()) {
+                throw new SQLException(
+                    "No se ha configurado GESTIONPRO_DB_PASSWORD"
+                );
+            }
 
             // Cargar el controlador JDBC de MySQL
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -39,18 +49,12 @@ public class ConexionBD {
 
         } catch (ClassNotFoundException e) {
 
-            System.out.println("======================================");
-            System.out.println(" ERROR: NO SE ENCONTRÓ MYSQL CONNECTOR/J ");
-            System.out.println("======================================");
-
+            System.out.println("ERROR: NO SE ENCONTRÓ MYSQL CONNECTOR/J");
             e.printStackTrace();
 
         } catch (SQLException e) {
 
-            System.out.println("======================================");
-            System.out.println(" ERROR AL CONECTAR CON MYSQL ");
-            System.out.println("======================================");
-
+            System.out.println("ERROR AL CONECTAR CON MYSQL");
             e.printStackTrace();
         }
 
@@ -71,15 +75,12 @@ public class ConexionBD {
                 conexion.close();
 
                 System.out.println(
-                        "Conexión cerrada correctamente."
+                    "Conexión cerrada correctamente."
                 );
 
             } catch (SQLException e) {
 
-                System.out.println(
-                        "Error al cerrar la conexión."
-                );
-
+                System.out.println("Error al cerrar la conexión.");
                 e.printStackTrace();
             }
         }

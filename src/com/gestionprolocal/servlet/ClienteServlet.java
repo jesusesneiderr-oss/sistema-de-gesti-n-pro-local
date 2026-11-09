@@ -67,6 +67,47 @@ public class ClienteServlet extends HttpServlet {
     }
 
     /**
+     * Lee el cuerpo de la petición (formato x-www-form-urlencoded)
+     * y lo convierte en un mapa clave-valor.
+     *
+     * Necesario porque el servidor solo parsea automáticamente el
+     * body como formulario (getParameter) en peticiones POST; en
+     * PUT, request.getParameter() siempre devuelve null aunque el
+     * body venga bien formado, por lo que hay que leerlo a mano.
+     */
+    private java.util.Map<String, String> leerParametrosDelBody(
+            HttpServletRequest request) throws IOException {
+
+        java.util.Map<String, String> parametros = new java.util.HashMap<>();
+
+        StringBuilder cuerpo = new StringBuilder();
+
+        try (java.io.BufferedReader lector = request.getReader()) {
+
+            String linea;
+
+            while ((linea = lector.readLine()) != null) {
+                cuerpo.append(linea);
+            }
+        }
+
+        for (String par : cuerpo.toString().split("&")) {
+
+            String[] partes = par.split("=", 2);
+
+            if (partes.length == 2) {
+
+                String clave = java.net.URLDecoder.decode(partes[0], "UTF-8");
+                String valor = java.net.URLDecoder.decode(partes[1], "UTF-8");
+
+                parametros.put(clave, valor);
+            }
+        }
+
+        return parametros;
+    }
+
+    /**
      * GET /clientes
      *
      * Consulta todos los clientes registrados.
@@ -180,7 +221,7 @@ public class ClienteServlet extends HttpServlet {
      *
      * Actualiza un cliente existente.
      *
-     * Parámetros:
+     * Parámetros (leídos del body, no con getParameter):
      * id
      * nombre
      * telefono
@@ -197,14 +238,19 @@ public class ClienteServlet extends HttpServlet {
         PrintWriter salida = response.getWriter();
 
         /*
-         * Primero obtenemos el ID como String.
-         * Esto evita que Integer.parseInt() reciba null.
+         * IMPORTANTE: el servidor solo parsea automáticamente el
+         * body como formulario (getParameter) en peticiones POST.
+         * En PUT, request.getParameter() siempre devuelve null
+         * aunque el body venga bien formado, por lo que leemos y
+         * parseamos el body manualmente.
          */
-        String idParametro = request.getParameter("id");
+        java.util.Map<String, String> datosBody = leerParametrosDelBody(request);
 
-        String nombre = request.getParameter("nombre");
-        String telefono = request.getParameter("telefono");
-        String correo = request.getParameter("correo");
+        String idParametro = datosBody.get("id");
+
+        String nombre = datosBody.get("nombre");
+        String telefono = datosBody.get("telefono");
+        String correo = datosBody.get("correo");
 
         // ==========================================
         // VALIDAR ID
